@@ -1,5 +1,5 @@
-import {sources} from '..';
+import { sources } from "..";
 
-test("should export 43 sources", () => {
-    expect(Object.keys(sources).length).toBe(43);
-})
+test("should export 44 sources", () => {
+  expect(Object.keys(sources).length).toBe(44);
+});
