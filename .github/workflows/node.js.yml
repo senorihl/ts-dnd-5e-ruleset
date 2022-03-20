@@ -26,6 +26,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
       - name: 🔍 Getting yarn cache directory
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -43,3 +44,11 @@ jobs:
         run: yarn build
       - name: 🎯 Run tests
         run: yarn jest
+      - name: 🔍 Getting current version
+        id: package-version
+        run: echo "::set-output name=version::$(cat package.json | grep version | cut -d \" -f 4)"
+      - if: matrix.node-version == 'lts/*'
+        name: Deploy to NPM (${{ steps.package-version.outputs.version }}-${{ github.sha }}.0)
+        run: yarn version --new-version ${{ steps.package-version.outputs.version }}-${{ github.sha }}.0 --no-git-tag-version && yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_ACTION }}
