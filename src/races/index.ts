@@ -1,17 +1,29 @@
 import { SourceKeys } from "../sources";
-import { Languages, Sizes, SourceArray } from "../utils";
+import { Languages, Sizes, SourceArray, Skills, Abilities } from "../utils";
 
 export type Feature = {
   name: string;
   limfeaname?: string;
   minlevel: number;
   usages: number;
-  dmg: string;
-  recovery: string;
-  action: [[type: string, _: string]];
-  range: string;
-  description: string;
-  dmgtype: string;
+  dmg?: string;
+  recovery?: string;
+  action?: [[type: string, _: string]];
+  range?: string;
+  description?: string;
+  dmgtype?: string;
+  spellcastingBonus?:
+    | {
+        name: string;
+        class: string;
+        level: number;
+        addon_text?: string;
+      }
+    | {
+        name: string;
+        spells: string[];
+        addon_text?: string;
+      };
 };
 
 export type CurrentCharacter = {
@@ -31,19 +43,16 @@ export type Race = {
   size: Sizes;
   speed: { walk: { spd: number; enc: number } };
   languageProfs: [...Languages[], number];
-  toolProfs?: [[type: string, nb: number]];
+  toolProfs?: Array<[type: string, nb: number]>;
   armorProfs?: [
     light: boolean,
     medium: boolean,
     heavy: boolean,
     shields: boolean
   ];
-  weaponProfs?: [
-    simple: boolean,
-    martial: boolean,
-    custom: ["battleaxe", "handaxe", "warhammer", "light hammer"]
-  ];
-  vision?: [[type: string, distance: number]];
+  skills?: Skills[];
+  weaponProfs?: [simple: boolean, martial: boolean, custom: string[]];
+  vision?: Array<[type: string, distance: number]>;
   age: string;
   height: string;
   weight: string;
@@ -53,6 +62,7 @@ export type Race = {
   skillstxt?: string;
   savetxt?: Partial<{
     adv_vs: string[];
+    text: string[];
   }>;
   dmgres?: string[];
   scores:
@@ -69,6 +79,19 @@ export type Race = {
   features?: {
     [name: string]: Feature | ((currentCharacter: CurrentCharacter) => Feature);
   };
+  spellcastingAbility?: Abilities;
+  spellcastingBonus?:
+    | {
+        name: string;
+        class: string;
+        level: number;
+        addon_text?: string;
+      }
+    | {
+        name: string;
+        spells: string[];
+        addon_text?: string;
+      };
   calcChanges?: (currentCharacter: CurrentCharacter) => Partial<{
     hp: [hp: number, reason: string];
   }>;
@@ -259,6 +282,157 @@ export const races: { [key: string]: Race } = {
         armorProfs: [true, true, false, false],
         scorestxt: "+2 Constitution, +2 Strength",
         scores: [2, 0, 2, 0, 0, 0],
+      },
+    ],
+  },
+  elf: {
+    regExpSearch:
+      /^(?!.*half)((?=.*(silvanesti|qualinesti))|((?=.*\b(elfs?|elves|elvish|elven)\b)(?=.*\b(high|sun|moon|grey|gray|valleys?|silvers?)\b))).*$/i,
+    name: "Elf",
+    sortname: "Elf",
+    source: [
+      [SourceKeys.SRD, 4],
+      [SourceKeys.P, 23],
+    ],
+    plural: "Elves",
+    size: 3,
+    speed: {
+      walk: { spd: 30, enc: 20 },
+    },
+    languageProfs: [Languages.Common, Languages.Elvish, 0],
+    vision: [["Darkvision", 60]],
+    scorestxt: "+2 Dexterity",
+    savetxt: {
+      text: ["Magic can't put me to sleep"],
+      adv_vs: ["charmed"],
+    },
+    weaponProfs: [false, false, []],
+    skills: [Skills.Perception],
+    age: " typically claim adulthood around age 100 and can live to be 750 years old",
+    height: ' range from under 5 to over 6 feet tall (4\'6" + 2d10")',
+    weight: " weigh around 115 lb (90 + 2d10 \xD7 1d4 lb)",
+    heightMetric:
+      " range from under 1,5 to over 1,8 metres tall (140 + 5d10 cm)",
+    weightMetric: " weigh around 55 kg (40 + 5d10 \xD7 2d4 / 10 kg)",
+    scores: [0, 2, 0, 0, 0, 0],
+    traits: {
+      "Keen Senses": "You have proficiency in the Perception skill",
+      "Fey Ancestry":
+        "You have advantage on saving throws against being charmed, and magic can’t put you to sleep",
+      Trance:
+        "Elves don’t need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is “trance.”) While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep.",
+      Languages:
+        "You can speak, read, and write Common and Elvish. Elvish is fluid, with subtle intonations and intricate grammar. Elven literature is rich and varied, and their songs and poems are famous among other races. Many bards learn their language so they can add Elvish ballads to their repertoires.",
+    },
+    variants: [
+      {
+        regExpSearch:
+          /^(?!.*half)((?=.*(silvanesti|qualinesti))|((?=.*\b(elfs?|elves|elvish|elven)\b)(?=.*\b(high|sun|moon|grey|gray|valleys?|silvers?)\b))).*$/i,
+        name: "High elf",
+        plural: "High elves",
+        sortname: "Elf, High",
+        scorestxt: "+2 Dexterity, +1 Intelligence",
+        weaponProfs: [
+          false,
+          false,
+          ["longsword", "shortsword", "longbow", "shortbow"],
+        ],
+        scores: [0, 2, 0, 1, 0, 0],
+        languageProfs: [Languages.Common, Languages.Elvish, 1],
+        traits: {
+          "Elf Weapon Training":
+            "You have proficiency with the longsword, shortsword, shortbow, and longbow",
+          Cantrip:
+            "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it",
+          "Extra Language":
+            "You can speak, read, and write one extra language of your choice",
+        },
+        spellcastingAbility: Abilities.INT,
+        spellcastingBonus: {
+          name: "High Elf Cantrip",
+          class: "wizard",
+          level: 0,
+          addon_text: "At will",
+        },
+      },
+      {
+        regExpSearch:
+          /^(?!.*half)((?=.*drow)|((?=.*\b(elfs?|elves|elvish|elven)\b)(?=.*\b(dark|underdarks?|deep|depths?)\b))).*$/i,
+        name: "Drow",
+        sortname: "Elf, Dark (Drow)",
+        source: [[SourceKeys.P, 24]],
+        plural: "Drow",
+        scorestxt: "+2 Dexterity, +1 Charisma",
+        vision: [
+          ["Darkvision", 60],
+          ["Sunlight Sensitivity", 0],
+        ],
+        weaponProfs: [false, false, ["rapier", "shortsword", "hand crossbow"]],
+        scores: [0, 2, 0, 0, 0, 1],
+        languageProfs: [Languages.Common, Languages.Elvish, 0],
+        traits: {
+          "Sunlight Sensitivity":
+            "Disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight when I or what I am trying to attack/perceive is in direct sunlight",
+          "Drow Magic":
+            "1st level: Dancing Lights cantrip; 3rd level: Faerie Fire; 5th level: Darkness. Both spells can be used once per long rest. Charisma is my spellcasting ability for these.", // errata to specify once per day is long rest
+        },
+        spellcastingAbility: Abilities.CHA,
+        features: {
+          "dancing lights": {
+            name: "Drow Magic (level 1)",
+            limfeaname: "Dancing Lights",
+            minlevel: 1,
+            usages: -1,
+            spellcastingBonus: {
+              name: "Drow Magic",
+              spells: ["dancing lights"],
+              addon_text: "At will",
+            },
+          },
+          "faerie fire": {
+            name: "Drow Magic (level 3)",
+            limfeaname: "Faerie Fire",
+            minlevel: 3,
+            usages: 1,
+            recovery: "long rest",
+            spellcastingBonus: {
+              name: "Drow Magic (level 3)",
+              spells: ["faerie fire"],
+              addon_text: "Once per long rest",
+            },
+          },
+          darkness: {
+            name: "Drow Magic (level 5)",
+            limfeaname: "Darkness",
+            minlevel: 5,
+            usages: 1,
+            recovery: "long rest",
+            spellcastingBonus: {
+              name: "Drow Magic (level 5)",
+              spells: ["darkness"],
+              addon_text: "Once per long rest",
+            },
+          },
+        },
+      },
+      {
+        regExpSearch:
+          /^(?!.*half)((?=.*(grugach|kagonesti|silhana))|((?=.*\b(elfs?|elves|elvish|elven)\b)(?=.*\b(woodlands?|woods?|forests?|wilds?|green)\b))).*$/i,
+        name: "Wood elf",
+        sortname: "Elf, Wood",
+        source: [[SourceKeys.P, 24]],
+        plural: "Wood elves",
+        scorestxt: "+2 Dexterity, +1 Wisdom",
+        weaponProfs: [
+          false,
+          false,
+          ["longsword", "shortsword", "longbow", "shortbow"],
+        ],
+        scores: [0, 2, 0, 0, 1, 0],
+        traits: {
+          "Mask of the Wild":
+            "I can attempt to hide even when I am only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena.",
+        },
       },
     ],
   },

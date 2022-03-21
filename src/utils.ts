@@ -18,13 +18,18 @@ export enum Languages {
   "Common" = "Common",
   "Draconic" = "Draconic",
   "Dwarvish" = "Dwarvish",
+  "Elvish" = "Elvish",
 }
 
 export enum Abilities {
   STR = "STR",
   DEX = "DEX",
   CON = "CON",
-  WIS = "WIS",
   INT = "INT",
+  WIS = "WIS",
   CHA = "CHA",
+}
+
+export enum Skills {
+  Perception,
 }
