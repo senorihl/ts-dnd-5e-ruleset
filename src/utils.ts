@@ -17,6 +17,7 @@ export const levels = [
 export enum Languages {
   "Common" = "Common",
   "Draconic" = "Draconic",
+  "Dwarvish" = "Dwarvish",
 }
 
 export enum Abilities {

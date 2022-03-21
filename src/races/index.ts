@@ -1,10 +1,28 @@
 import { SourceKeys } from "../sources";
 import { Languages, Sizes, SourceArray } from "../utils";
 
-export type Feature = {};
+export type Feature = {
+  name: string;
+  limfeaname?: string;
+  minlevel: number;
+  usages: number;
+  dmg: string;
+  recovery: string;
+  action: [[type: string, _: string]];
+  range: string;
+  description: string;
+  dmgtype: string;
+};
+
+export type CurrentCharacter = {
+  race: Race;
+  level: number;
+  hitDice: { total: number };
+};
 
 export type Race = {
   name: string;
+  sortname?: string;
   description?: string;
   regExpSearch: RegExp;
   plural: string;
@@ -13,6 +31,13 @@ export type Race = {
   size: Sizes;
   speed: { walk: { spd: number; enc: number } };
   languageProfs: [...Languages[], number];
+  toolProfs?: [[type: string, nb: number]];
+  weaponProfs?: [
+    simple: boolean,
+    martial: boolean,
+    custom: ["battleaxe", "handaxe", "warhammer", "light hammer"]
+  ];
+  vision?: [[type: string, distance: number]];
   age: string;
   height: string;
   weight: string;
@@ -20,22 +45,27 @@ export type Race = {
   weightMetric: string;
   scorestxt: string;
   skillstxt?: string;
+  savetxt?: Partial<{
+    adv_vs: string[];
+  }>;
+  dmgres?: string[];
   scores:
     | [
         str: number,
         dex: number,
         con: number,
-        wis: number,
         int: number,
+        wis: number,
         cha: number
       ]
     | [[amount: number, nb: number]];
-  traits: { [name: string]: string };
+  traits?: { [name: string]: string };
   features?: {
-    [name: string]:
-      | Feature
-      | ((currentCharacter: { race: Race & { level: number } }) => Feature);
+    [name: string]: Feature | ((currentCharacter: CurrentCharacter) => Feature);
   };
+  calcChanges?: (currentCharacter: CurrentCharacter) => Partial<{
+    hp: [hp: number, reason: string];
+  }>;
 };
 
 export const races: { [key: string]: Race } = {
@@ -60,7 +90,6 @@ export const races: { [key: string]: Race } = {
     weightMetric: " weigh around 75 kg (50 + 5d10 \xD7 4d4 / 10 kg)",
     scorestxt: "+1 to all ability scores",
     scores: [1, 1, 1, 1, 1, 1],
-    traits: {},
     variants: [
       {
         regExpSearch: /variant/i,
@@ -116,11 +145,11 @@ export const races: { [key: string]: Race } = {
         minlevel: 1,
         usages: 1,
         dmg:
-          (currentCharacter.race.level < 6
+          (currentCharacter.level < 6
             ? 2
-            : currentCharacter.race.level < 11
+            : currentCharacter.level < 11
             ? 3
-            : currentCharacter.race.level < 16
+            : currentCharacter.level < 16
             ? 4
             : 5) + "d6",
         recovery: "short rest",
@@ -159,6 +188,61 @@ export const races: { [key: string]: Race } = {
       { name: "Red dragonborn" },
       { name: "Silver dragonborn" },
       { name: "White dragonborn" },
+    ],
+  },
+  dwarf: {
+    regExpSearch:
+      /^((?=.*(neidar|klar))|((?=.*\b(dwarfs?|dwarves|dwarfish|dwarvish|dwarven)\b)(?=.*\b(hill|gold)\b))).*$/i,
+    name: "dwarf",
+    sortname: "Dwarf",
+    source: [
+      [SourceKeys.SRD, 3],
+      [SourceKeys.P, 20],
+    ],
+    plural: "Dwarves",
+    size: 3,
+    speed: {
+      walk: { spd: 25, enc: 25 },
+    },
+    languageProfs: [Languages.Common, Languages.Dwarvish, 0],
+    vision: [["Darkvision", 60]],
+    scorestxt: "+2 Constitution",
+    savetxt: { adv_vs: ["poison"] },
+    dmgres: ["Poison"],
+    weaponProfs: [
+      false,
+      false,
+      ["battleaxe", "handaxe", "warhammer", "light hammer"],
+    ],
+    toolProfs: [["Smith, brewer, or mason tools", 1]],
+    age: " are considered young until they are 50 and live about 350 years",
+    height: ' stand between 4 and 5 feet tall (3\'8" + 2d4")',
+    weight: " weigh around 150 lb (115 + 2d4 \xD7 2d6 lb)",
+    heightMetric: " stand between 1,2 and 1,5 metres tall (110 + 5d4 cm)",
+    weightMetric: " weigh around 70 kg (55 + 5d4 \xD7 4d6 / 10 kg)",
+    scores: [0, 0, 2, 0, 0, 0],
+    traits: {
+      Stonecunning:
+        "Whenever I make an Intelligence (History) check related to the origin of stonework, I am considered proficient in the History skill and add double my proficiency bonus to the check, instead of my normal proficiency bonus",
+    },
+    variants: [
+      {
+        name: "Hill dwarf",
+        sortname: "Dwarf, Hill",
+        plural: "Hill dwarves",
+        scorestxt: "+2 Constitution, +1 Wisdom",
+        scores: [0, 0, 2, 0, 1, 0],
+        traits: {
+          "Dwarven Toughness":
+            "My hit point maximum increases by 1 for every level I have",
+        },
+        calcChanges: (currentCharacter) => ({
+          hp: [
+            currentCharacter.level + currentCharacter.hitDice.total,
+            "Dwarven Toughness",
+          ],
+        }),
+      },
     ],
   },
 };
