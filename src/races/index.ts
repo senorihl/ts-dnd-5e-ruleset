@@ -32,6 +32,12 @@ export type Race = {
   speed: { walk: { spd: number; enc: number } };
   languageProfs: [...Languages[], number];
   toolProfs?: [[type: string, nb: number]];
+  armorProfs?: [
+    light: boolean,
+    medium: boolean,
+    heavy: boolean,
+    shields: boolean
+  ];
   weaponProfs?: [
     simple: boolean,
     martial: boolean,
@@ -193,7 +199,7 @@ export const races: { [key: string]: Race } = {
   dwarf: {
     regExpSearch:
       /^((?=.*(neidar|klar))|((?=.*\b(dwarfs?|dwarves|dwarfish|dwarvish|dwarven)\b)(?=.*\b(hill|gold)\b))).*$/i,
-    name: "dwarf",
+    name: "Dwarf",
     sortname: "Dwarf",
     source: [
       [SourceKeys.SRD, 3],
@@ -242,6 +248,17 @@ export const races: { [key: string]: Race } = {
             "Dwarven Toughness",
           ],
         }),
+      },
+      {
+        regExpSearch:
+          /^((?=.*(hylar|daewar))|((?=.*\b(dwarfs?|dwarves|dwarfish|dwarvish|dwarven)\b)(?=.*\b(mountain|shield)\b))).*$/i,
+        name: "Mountain dwarf",
+        sortname: "Dwarf, Mountain",
+        source: [[SourceKeys.P, 20]],
+        plural: "Mountain dwarves",
+        armorProfs: [true, true, false, false],
+        scorestxt: "+2 Constitution, +2 Strength",
+        scores: [2, 0, 2, 0, 0, 0],
       },
     ],
   },
