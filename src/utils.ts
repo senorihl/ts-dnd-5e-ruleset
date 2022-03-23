@@ -21,6 +21,7 @@ export enum Languages {
   "Elvish" = "Elvish",
   "Gnomish" = "Gnomish",
   "Undercommon" = "Undercommon",
+  "Halfling" = "Halfling",
 }
 
 export enum Abilities {

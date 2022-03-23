@@ -1,4 +1,5 @@
 import { SourceKeys } from "../sources";
+import { Spell } from "../spells";
 import { Languages, Sizes, SourceArray, Skills, Abilities } from "../utils";
 
 export type Feature = {
@@ -24,6 +25,7 @@ export type Feature = {
         spells: string[];
         addon_text?: string;
       };
+  spellChanges?: { [spell: string]: Partial<Spell> & { changes: string } };
 };
 
 export type CurrentCharacter = {
@@ -532,6 +534,155 @@ Music Box: When opened, this music box plays a single song at a moderate volume.
         traits: {
           "Stone Camouflage":
             "I have advantage on Dexterity (stealth) checks to hide in rocky terrain.",
+        },
+      },
+    ],
+  },
+  halfling: {
+    regExpSearch:
+      /^((?=.*(hairfoot|tallfellow))|((?=.*\b(halflings?|hobbits?)\b)(?=.*lightfoot))).*$/i,
+    name: "Halfling",
+    sortname: "Halfling",
+    source: [
+      [SourceKeys.SRD, 4],
+      [SourceKeys.P, 28],
+    ],
+    plural: "Halflings",
+    size: 4,
+    speed: {
+      walk: { spd: 25, enc: 15 },
+    },
+    languageProfs: [Languages.Common, Languages.Halfling, 0],
+    savetxt: { adv_vs: ["frightened"] },
+    age: " reach adulthood at age 20 and live around 150 years",
+    height: ' average about 3 feet tall (2\'7" + 2d4")',
+    weight: " weigh around 40 lb (35 + 2d4 lb)",
+    heightMetric: " average about 90 cm tall (80 + 5d4)",
+    weightMetric: " weigh around 18 kg (16 + 5d4 / 10 kg)",
+    scores: [0, 2, 0, 0, 0, 0],
+    scorestxt: "+2 Dexterity",
+    traits: {
+      Lucky:
+        "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll",
+      Brave: "You have advantage on saving throws against being frightened",
+      "Halfling Nimbleness":
+        "You can move through the space of any creature that is of a size larger than yours",
+      Languages:
+        "You can speak, read, and write Common and Halfling. The Halfling language isn’t secret, but halflings are loath to share it with others. They write very little, so they don’t have a rich body of literature. Their oral tradition, however, is very strong. Almost all halflings speak Common to converse with the people in whose lands they dwell or through which they are traveling",
+    },
+    variants: [
+      {
+        regExpSearch:
+          /^((?=.*(hairfoot|tallfellow))|((?=.*\b(halflings?|hobbits?)\b)(?=.*lightfoot))).*$/i,
+        name: "Lightfoot halfling",
+        sortname: "Halfling, Lightfoot",
+        source: [
+          [SourceKeys.SRD, 4],
+          [SourceKeys.P, 28],
+        ],
+        plural: "Lightfoot halflings",
+        scores: [0, 2, 0, 0, 0, 1],
+        scorestxt: "+2 Dexterity, +1 Charisma",
+        traits: {
+          "Naturally Stealthy":
+            "I can attempt to hide even when I am obscured only by a creature that is at least one size larger than me.",
+        },
+      },
+      {
+        regExpSearch: /^(?=.*\b(halflings?|hobbits?)\b)(?=.*stout).*$/i,
+        name: "Stout halfling",
+        sortname: "Halfling, Stout",
+        source: [[SourceKeys.P, 28]],
+        plural: "Stout halflings",
+        size: 4,
+        speed: {
+          walk: { spd: 25, enc: 15 },
+        },
+        savetxt: { adv_vs: ["frightened", "poison"] },
+        dmgres: ["Poison"],
+        age: " reach adulthood at age 20 and live around 150 years",
+        height: ' average about 3 feet tall (2\'7" + 2d4")',
+        weight: " weigh around 40 lb (35 + 2d4 lb)",
+        heightMetric: " average about 90 cm tall (80 + 5d4)",
+        weightMetric: " weigh around 18 kg (16 + 5d4 / 10 kg)",
+        scores: [0, 2, 1, 0, 0, 0],
+        scorestxt: "+2 Dexterity, +1 Constitution",
+      },
+      {
+        regExpSearch: /^(?=.*\b(halflings?|hobbits?)\b)(?=.*ghostwise).*$/i,
+        name: "Ghostwise halfling",
+        sortname: "Halfling, Ghostwise",
+        plural: "Ghostwise halflings",
+        source: [[SourceKeys.S, 110]],
+        size: 4,
+        speed: {
+          walk: { spd: 25, enc: 15 },
+        },
+        scores: [0, 2, 0, 0, 1, 0],
+        scorestxt: "+2 Dexterity, +1 Wisdom",
+        traits: {
+          "Silent Speech":
+            "I can speak telepathically to any one creature within 30 feet of me. It only understands me if we share a language",
+        },
+      },
+      {
+        regExpSearch: /^(?=.*\b(halflings?|hobbits?)\b)(?=.*lotusden).*$/i,
+        name: "Lotusden Halfling",
+        sortname: "Halfling, Lotusden",
+        source: [[SourceKeys.W, 164]],
+        plural: "Lotusden Halflings",
+        size: 4,
+        speed: {
+          walk: { spd: 25, enc: 15 },
+        },
+        scores: [0, 2, 0, 0, 1, 0],
+        scorestxt: "+2 Dexterity, +1 Wisdom",
+        traits: {
+          "Child of the Wood":
+            "I know the Druidcraft cantrip. At 3rd level, I can cast Entangle once per long rest. At 5th level, I can cast Spike Growth once per long rest without a material component. Wisdom is my spellcasting ability for these.",
+          Timberwalk:
+            "Checks to track me have disadv. I need not expend extra movement to move over difficult terrain of nonmagical plants.",
+        },
+
+        spellcastingAbility: Abilities.WIS,
+        spellcastingBonus: {
+          name: "Child of the Wood (level 1)",
+          spells: ["druidcraft"],
+          addon_text: "At will",
+        },
+        features: {
+          entangle: {
+            name: "Child of the Wood (level 3)",
+            limfeaname: "Entangle",
+            minlevel: 3,
+            usages: 1,
+            recovery: "long rest",
+            spellcastingBonus: {
+              name: "Child of the Wood (level 3)",
+              spells: ["entangle"],
+              addon_text: "once per long rest",
+            },
+          },
+          "spike growth": {
+            name: "Child of the Wood (level 5)",
+            limfeaname: "Spike Growth",
+            minlevel: 5,
+            usages: 1,
+            recovery: "long rest",
+            spellcastingBonus: {
+              name: "Child of the Wood (level 5)",
+              spells: ["spike growth"],
+              addon_text: "once per long rest",
+            },
+            spellChanges: {
+              "spike growth": {
+                components: "V,S",
+                compMaterial: "",
+                changes:
+                  "Using Child of the Wood, I can cast Spike Growth once per long rest without requiring a material component.",
+              },
+            },
+          },
         },
       },
     ],
