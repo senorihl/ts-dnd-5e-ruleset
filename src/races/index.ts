@@ -32,6 +32,22 @@ export type CurrentCharacter = {
   hitDice: { total: number };
 };
 
+export type SpellCasterRace = {
+  spellcastingAbility?: Abilities;
+  spellcastingBonus?:
+    | {
+        name: string;
+        class: string;
+        level: number;
+        addon_text?: string;
+      }
+    | {
+        name: string;
+        spells: string[];
+        addon_text?: string;
+      };
+};
+
 export type Race = {
   name: string;
   sortname?: string;
@@ -43,7 +59,7 @@ export type Race = {
   size: Sizes;
   speed: { walk: { spd: number; enc: number } };
   languageProfs: [...Languages[], number];
-  toolProfs?: Array<[type: string, nb: number]>;
+  toolProfs?: Array<string | [type: string, nb: number]>;
   armorProfs?: [
     light: boolean,
     medium: boolean,
@@ -79,23 +95,11 @@ export type Race = {
   features?: {
     [name: string]: Feature | ((currentCharacter: CurrentCharacter) => Feature);
   };
-  spellcastingAbility?: Abilities;
-  spellcastingBonus?:
-    | {
-        name: string;
-        class: string;
-        level: number;
-        addon_text?: string;
-      }
-    | {
-        name: string;
-        spells: string[];
-        addon_text?: string;
-      };
+
   calcChanges?: (currentCharacter: CurrentCharacter) => Partial<{
     hp: [hp: number, reason: string];
   }>;
-};
+} & SpellCasterRace;
 
 export const races: { [key: string]: Race } = {
   human: {
@@ -432,6 +436,102 @@ export const races: { [key: string]: Race } = {
         traits: {
           "Mask of the Wild":
             "I can attempt to hide even when I am only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena.",
+        },
+      },
+    ],
+  },
+  gnome: {
+    regExpSearch: /^((?=.*\bgnomes?\b)(?=.*\b(rocks?|tinker|tinkering)\b)).*$/i,
+    name: "Gnome",
+    sortname: "Gnome, Rock",
+    source: [
+      [SourceKeys.SRD, 6],
+      [SourceKeys.P, 37],
+    ],
+    plural: "Gnomes",
+    size: 4,
+    speed: {
+      walk: { spd: 25, enc: 15 },
+    },
+    languageProfs: [Languages.Common, Languages.Gnomish, 0],
+    toolProfs: ["Tinker's tools"],
+    vision: [["Darkvision", 60]],
+    savetxt: { text: ["Adv. on Int/Wis/Cha saves vs. magic"] },
+    age: " start adult life around age 40 and can live 350 to almost 500 years",
+    height: ' are 3 to 4 feet tall (2\'11" + 2d4")',
+    weight: " weigh around 40 lb (35 + 2d4 lb)",
+    heightMetric: " are 90 to 120 cm tall (2'11\" + 5d4)",
+    weightMetric: " weigh around 18 kg (16 + 5d4 / 10 kg)",
+    scorestxt: "+2 Intelligence",
+    scores: [0, 0, 0, 2, 0, 0],
+    traits: {
+      "Gnome Cunning":
+        "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic",
+      Languages:
+        "You can speak, read, and write Common and Gnomish. The Gnomish language, which uses the Dwarvish script, is renowned for its technical treatises and its catalogs of knowledge about the natural world.",
+    },
+    variants: [
+      {
+        name: "Rock gnome",
+        sortname: "Gnome, Rock",
+        plural: "Rock gnomes",
+        scores: [0, 0, 1, 2, 0, 0],
+        scorestxt: "+2 Intelligence, +1 Constitution",
+        traits: {
+          "Artificer’s Lore":
+            "Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply",
+          Tinker: `Construct a Tiny clockwork device (AC 5, 1 HP) using tinker's tools, 1 hour, and 10 gp of material components, that functions for 24 hours. I can have up to 3 active.
+Clockwork Toy: This toy is a clockwork animal, monster, or person, such as a frog, mouse, bird, dragon, or soldier. When placed on the ground, the toy moves 5 feet across the ground on each of your turns in a random direction. It makes noises as appropriate to the creature it represents.
+Fire Starter: The device produces a miniature flame, which you can use to light a candle, torch, or campfire. Using the device requires your action.
+Music Box: When opened, this music box plays a single song at a moderate volume. The box stops playing when it reaches the song’s end or when it is closed.`,
+        },
+      },
+      {
+        regExpSearch:
+          /^((?=.*\bgnomes?\b)(?=.*\b(woods?|forests?|wilds?|green)\b)).*$/i,
+        name: "Forest gnome",
+        sortname: "Gnome, Forest",
+        source: [[SourceKeys.P, 37]],
+        plural: "Forest gnomes",
+        scores: [0, 1, 0, 2, 0, 0],
+        scorestxt: "+2 Intelligence, +1 Dexterity",
+        traits: {
+          "Natural Illusionist":
+            "I know the Minor Illusion cantrip. Intelligence is my spellcasting ability for it",
+          "Speak with Small Beasts":
+            "Through sounds and gestures, I can communicate simple ideas with Small or smaller beasts",
+        },
+        spellcastingAbility: Abilities.INT,
+        spellcastingBonus: {
+          name: "Natural Illusionist",
+          spells: ["minor illusion"],
+          addon_text: "At will",
+        },
+      },
+      {
+        regExpSearch:
+          /^((?=.*svirfneblin)|((?=.*\bgnomes?\b)(?=.*\b(underdarks?|deep|depths?)\b))).*$/i,
+        name: "Svirfneblin",
+        sortname: "Gnome, Deep (Svirfneblin)",
+        source: [
+          [SourceKeys.E, 7],
+          [SourceKeys.S, 115],
+          [SourceKeys.MToF, 113],
+        ],
+        plural: "Svirfneblin",
+        languageProfs: [
+          Languages.Common,
+          Languages.Gnomish,
+          Languages.Undercommon,
+          0,
+        ],
+        vision: [["Darkvision", 120]],
+        savetxt: { text: ["Adv. on Int/Wis/Cha saves vs. magic"] },
+        scores: [0, 1, 0, 2, 0, 0],
+        scorestxt: "+2 Intelligence, +1 Dexterity",
+        traits: {
+          "Stone Camouflage":
+            "I have advantage on Dexterity (stealth) checks to hide in rocky terrain.",
         },
       },
     ],
